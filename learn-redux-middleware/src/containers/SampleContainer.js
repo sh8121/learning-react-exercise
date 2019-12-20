@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { connect } from "react-redux";
 import Sample from "../components/Sample";
-import { getPost, getUsers } from "../modules/sample";
+import { GET_POST, GET_USERS, getPost, getUsers } from "../modules/sample";
 
 const SampleContainer = ({
 	getPost,
@@ -12,8 +12,15 @@ const SampleContainer = ({
 	loadingUsers
 }) => {
 	useEffect(() => {
-		getPost(1);
-		getUsers();
+		const fn = () => {
+			try {
+				getPost(1);
+				getUsers();
+			} catch (e) {
+				console.log(e);
+			}
+		};
+		fn();
 	}, [getPost, getUsers]);
 
 	return (
@@ -27,9 +34,11 @@ const SampleContainer = ({
 };
 
 export default connect(
-	state => ({
-		post: state.post,
-		users: state.users
+	({ sample, loading }) => ({
+		post: sample.post,
+		users: sample.users,
+		loadingPost: loading[GET_POST],
+		loadingUsers: loading[GET_USERS]
 	}),
 	{
 		getPost,
