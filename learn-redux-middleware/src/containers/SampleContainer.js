@@ -12,10 +12,10 @@ const SampleContainer = ({
 	loadingUsers
 }) => {
 	useEffect(() => {
-		const fn = () => {
+		const fn = async () => {
 			try {
-				getPost(1);
-				getUsers();
+				await getPost(1);
+				await getUsers();
 			} catch (e) {
 				console.log(e);
 			}
