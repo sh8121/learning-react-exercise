@@ -3,6 +3,7 @@ import * as api from "../lib/api";
 //import createRequestThunk from "../lib/createRequestThunk";
 import { call, put, takeLatest } from "redux-saga/effects";
 import { startLoading, finishLoading } from "./loading";
+import createRequestSaga from "../lib/createRequestSaga";
 
 export const GET_POST = "sample/GET_POST";
 const GET_POST_SUCCESS = "sample/GET_POST_SUCCESS";
@@ -17,41 +18,43 @@ const GET_USERS_FAILURE = "sample/GET_USERS_FAILURE";
 export const getPost = createAction(GET_POST, id => id);
 export const getUsers = createAction(GET_USERS);
 
-function* getPostSaga(action) {
-	yield put(startLoading(GET_POST));
-	try {
-		const post = yield call(api.getPost, action.payload);
-		yield put({
-			type: GET_POST_SUCCESS,
-			payload: post.data
-		});
-	} catch (e) {
-		yield put({
-			type: GET_POST_FAILURE,
-			payload: e,
-			error: true
-		});
-	}
-	yield put(finishLoading(GET_POST));
-}
+const getPostSaga = createRequestSaga(GET_POST, api.getPost);
+const getUsersSaga = createRequestSaga(GET_USERS, api.getUsers);
+// function* getPostSaga(action) {
+// 	yield put(startLoading(GET_POST));
+// 	try {
+// 		const post = yield call(api.getPost, action.payload);
+// 		yield put({
+// 			type: GET_POST_SUCCESS,
+// 			payload: post.data
+// 		});
+// 	} catch (e) {
+// 		yield put({
+// 			type: GET_POST_FAILURE,
+// 			payload: e,
+// 			error: true
+// 		});
+// 	}
+// 	yield put(finishLoading(GET_POST));
+// }
 
-function* getUsersSaga() {
-	yield put(startLoading(GET_USERS));
-	try {
-		const users = yield call(api.getUsers);
-		yield put({
-			type: GET_USERS_SUCCESS,
-			payload: users.data
-		});
-	} catch (e) {
-		yield put({
-			type: GET_USERS_FAILURE,
-			payload: e,
-			error: true
-		});
-	}
-	yield put(finishLoading(GET_USERS));
-}
+// function* getUsersSaga() {
+// 	yield put(startLoading(GET_USERS));
+// 	try {
+// 		const users = yield call(api.getUsers);
+// 		yield put({
+// 			type: GET_USERS_SUCCESS,
+// 			payload: users.data
+// 		});
+// 	} catch (e) {
+// 		yield put({
+// 			type: GET_USERS_FAILURE,
+// 			payload: e,
+// 			error: true
+// 		});
+// 	}
+// 	yield put(finishLoading(GET_USERS));
+// }
 
 export function* sampleSaga() {
 	yield takeLatest(GET_POST, getPostSaga);
