@@ -11,7 +11,7 @@ import thunk from "redux-thunk";
 import createSagaMiddleware, { END } from "redux-saga";
 import rootReducer, { rootSaga } from "./modules";
 import PreloadContext from "./lib/PreloadContext";
-//import { ChunkExtractor, ChunkExtractorManager } from "@loadable/server";
+import { ChunkExtractor, ChunkExtractorManager } from "@loadable/server";
 
 const manifest = JSON.parse(
 	fs.readFileSync(path.resolve("./build/asset-manifest.json"), "utf8")
@@ -65,13 +65,15 @@ const serverRender = async (req, res, next) => {
 	const extractor = new ChunkExtractor({ statsFile });
 
 	const jsx = (
-		<PreloadContext.Provider value={preloadContext}>
-			<Provider store={store}>
-				<StaticRouter location={req.url} context={context}>
-					<App />
-				</StaticRouter>
-			</Provider>
-		</PreloadContext.Provider>
+		<ChunkExtractorManager extractor={extractor}>
+			<PreloadContext.Provider value={preloadContext}>
+				<Provider store={store}>
+					<StaticRouter location={req.url} context={context}>
+						<App />
+					</StaticRouter>
+				</Provider>
+			</PreloadContext.Provider>
+		</ChunkExtractorManager>
 	);
 	ReactDOMServer.renderToStaticMarkup(jsx);
 	store.dispatch(END);

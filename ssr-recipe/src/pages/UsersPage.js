@@ -4,6 +4,7 @@ import UserContainer from "../containers/UserContainer";
 import { Route } from "react-router-dom";
 
 const UsersPage = () => {
+	console.log("userpage");
 	return (
 		<>
 			<UsersContainer />
