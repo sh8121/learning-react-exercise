@@ -11,7 +11,7 @@ import thunk from "redux-thunk";
 import createSagaMiddleware, { END } from "redux-saga";
 import rootReducer, { rootSaga } from "./modules";
 import PreloadContext from "./lib/PreloadContext";
-//import { ChunkExtractor, ChunkExtractorManager } from "@loadable/server";
+import { ChunkExtractor, ChunkExtractorManager } from "@loadable/server";
 
 const manifest = JSON.parse(
 	fs.readFileSync(path.resolve("./build/asset-manifest.json"), "utf8")
@@ -24,7 +24,7 @@ const chunks = Object.keys(manifest.files)
 	.map(key => `<script src="${manifest.files[key]}"></script>`)
 	.join("");
 
-function createPage(root, tags) {
+function createPage(root, stateScript) {
 	return `<!DOCTYPE html>
 	<html lang="en">
 	<head>
@@ -33,15 +33,17 @@ function createPage(root, tags) {
 		<meta name="viewport" content="width=device-width,initial-scale=1,shrink-to-fit=no" />
 		<meta name="theme-color" content="#000000" />
 		<title>React App</title>
-		${tags.styles}
-		${tags.links}
+		<link href="${manifest.files["main.css"]}" rel="stylesheet" />
 	</head>
 	<body>
 		<noscript>You need to...</noscript>
 		<div id="root">
 			${root}
 		</div>
-		${tags.scripts}		
+		${stateScript}
+		<script src="${manifest.files["runtime-main.js"]}"></script>
+		${chunks}
+		<script src="${manifest.files["main.js"]}"></script>
 	</body>
 	</html>
 	`;
@@ -62,7 +64,7 @@ const serverRender = async (req, res, next) => {
 		promises: []
 	};
 
-	const extractor = new ChunkExtractor({ statsFile });
+	//const extractor = new ChunkExtractor({ statsFile });
 
 	const jsx = (
 		<PreloadContext.Provider value={preloadContext}>
@@ -87,12 +89,12 @@ const serverRender = async (req, res, next) => {
 	const root = ReactDOMServer.renderToString(jsx);
 	const stateString = JSON.stringify(store.getState()).replace(/</g, "\\u003c");
 	const stateScript = `<script>__PRELOADED_STATE__ = ${stateString}</script>`;
-	const tags = {
-		scripts: stateScript + extractor.getScriptTags(),
-		links: extractor.getLinkTags(),
-		styles: extractor.getStyleTags()
-	};
-	res.send(createPage(root, tags));
+	// const tags = {
+	// 	scripts: stateScript + extractor.getScriptTags(),
+	// 	links: extractor.getLinkTags(),
+	// 	styles: extractor.getStyleTags()
+	// };
+	res.send(createPage(root, stateScript));
 };
 
 const serve = express.static(path.resolve("./build"), {
