@@ -17,14 +17,14 @@ const manifest = JSON.parse(
 	fs.readFileSync(path.resolve("./build/asset-manifest.json"), "utf8")
 );
 
-//const statsFile = path.resolve("./build/loadable-stats.json");
+const statsFile = path.resolve("./build/loadable-stats.json");
 
 const chunks = Object.keys(manifest.files)
 	.filter(key => /chunk\.js$/.exec(key))
 	.map(key => `<script src="${manifest.files[key]}"></script>`)
 	.join("");
 
-function createPage(root, tags) {
+function createPage(root, stateScript) {
 	return `<!DOCTYPE html>
 	<html lang="en">
 	<head>
